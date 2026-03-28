@@ -65,7 +65,7 @@ KEYWORDS:
         input=full_prompt,
         text=True,
         capture_output=True,
-        timeout=120
+        timeout=20
     )
 
     if result.returncode != 0:
@@ -110,7 +110,7 @@ Rules:
 - Do NOT include variable names
 """
 
-    API_URL = "https://api-inference.huggingface.co/models/bigcode/starcoderbase-1b"
+    API_URL = "https://router.huggingface.co/hf-inference/models/google/flan-t5-base"
 
     headers = {}
     if HF_API_KEY:
@@ -219,15 +219,20 @@ Rules:
 # -------------------------
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'supersecretkey'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'fallback-secret')
+basedir = os.path.abspath(os.path.dirname(__file__))
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'users.db')
 
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 login_manager = LoginManager(app)
 login_manager.login_view = "home"
 
+with app.app_context():
+    db.create_all()
+    print("Database created successfully")
 
+print("HF KEY:", HF_API_KEY)
 
 # -------------------------
 # User Model
