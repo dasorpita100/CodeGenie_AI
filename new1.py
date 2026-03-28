@@ -220,17 +220,18 @@ Rules:
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'fallback-secret')
+
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'users.db')
 
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 login_manager = LoginManager(app)
-login_manager.login_view = "home"
 
+# ✅ ADD HERE
 with app.app_context():
     db.create_all()
-    print("Database created successfully")
+    print("✅ Database initialized on Render")
 
 print("HF KEY:", HF_API_KEY)
 
