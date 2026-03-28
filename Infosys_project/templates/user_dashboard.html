@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Dashboard</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #4f8dfd, #9b59b6);
+            color: white;
+        }
+
+        h1 {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .container {
+            padding: 30px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            color: black;
+            padding: 20px;
+            border-radius: 14px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            transition: 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            color: white;
+            background: #4f8dfd;
+            margin-bottom: 10px;
+        }
+
+        pre {
+            background: #111;
+            color: #00ff9c;
+            padding: 10px;
+            border-radius: 8px;
+            max-height: 150px;
+            overflow: auto;
+        }
+
+        .date {
+            font-size: 12px;
+            color: gray;
+            margin-top: 10px;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            padding: 0 30px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            color: black;
+            padding: 20px;
+            border-radius: 14px;
+            text-align: center;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+
+        .stat-card h3 {
+            margin: 0;
+            font-size: 16px;
+            color: gray;
+        }
+
+        .stat-card p {
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        canvas {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 10px;
+            max-width: 500px;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>🚀 User Dashboard</h1>
+
+<div class="stats">
+
+    <div class="stat-card">
+        <h3>📊 Total Codes</h3>
+        <p>{{ history|length }}</p>
+    </div>
+
+    <div class="stat-card">
+        <h3>💻 Languages Used</h3>
+        <p>{{ language_count }}</p> 
+    </div>
+
+    <div class="stat-card">
+    <h3>🔥 Top Language</h3>
+    <p>{{ top_language }}</p>
+    </div>
+
+    <div class="stat-card">
+        <h3>⭐ Avg Rating</h3>
+        <p>{{ avg_rating }}/5</p>
+    </div>
+
+</div>
+
+
+<div class="container">
+
+    <div class="grid">
+
+        {% for item, user in history %}
+        <div class="card">
+
+            <div class="tag">{{ item.language }}</div>
+
+            <p style="font-size:12px; color:gray;">
+                👤 {{ user.name }}
+            </p>
+
+            <h3>{{ item.prompt }}</h3>
+
+            <pre>{{ item.code }}</pre>
+
+            <div class="date">
+                {{ item.created_at.strftime('%d %b %Y, %I:%M %p') }}
+            </div>
+
+        </div>
+        {% endfor %}
+
+    </div>
+
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</body>
+</html>
+
+
+
+
+

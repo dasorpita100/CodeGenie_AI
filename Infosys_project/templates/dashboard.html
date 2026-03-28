@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Code Generator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #4f8dfd, #9b59b6);
+            min-height: 100vh;
+            color: white;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px 50px;
+            background: rgba(0,0,0,0.2);
+        }
+
+        .navbar h2 {
+            font-weight: 700;
+        }
+
+        .container {
+            padding: 40px 60px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .card-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .card {
+            background: rgba(255,255,255,0.95);
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+
+            width: 160px;
+            height: 120px;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+        .card.selected{
+            background:#4f8dfd;
+            color:white;
+        }
+
+        .card.selected p {
+            color: white;
+        }
+
+        .card img {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+            margin-bottom: 8px;
+        }
+
+        .card p {
+            color: black;
+            font-weight: 600;
+        }
+
+        .prompt-box {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            color: black;
+        }
+
+        textarea {
+            width: 100%;
+            height: 120px;
+            padding: 12px;
+            border-radius: 10px;
+            border: none;
+            outline: none;
+        }
+
+        .generate-btn {
+            padding: 12px 25px;
+            background: #4f8dfd;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .output-box {
+            margin-top: 10px;
+            background: #0d1117;
+            color: #00ff88;
+            padding: 20px;
+            border-radius: 12px;
+            min-height: 350px;
+            overflow:auto;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+
+        @media(max-width: 900px){
+            .card-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .main-grid{
+            display:grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap:30px;
+            margin-top:30px;
+            align-items: start;
+        }
+
+        .left-panel{
+            display:flex;
+            flex-direction:column;
+            gap:20px;
+        }
+
+        .code-panel{
+            background:white;
+            padding:20px;
+            border-radius:12px;
+            color:black;
+        }
+
+        .explanation-box,
+        .keywords-box{
+            background:white;
+            padding:20px;
+            border-radius:12px;
+            color:black;
+        }
+
+        .btn-row{
+            display:flex;
+            gap:10px;
+        }
+
+        .copy-btn{
+            padding:12px 25px;
+            background:#27ae60;
+            color:white;
+            border:none;
+            border-radius:8px;
+            cursor:pointer;
+        }
+
+        .code-title{
+            color:black;
+            margin-bottom:10px;
+        }
+
+        /* ===== USER DROPDOWN MENU ===== */
+
+        .user-menu {
+            position: relative;
+        }
+
+        .dropdown {
+            position: absolute;
+            right: 0;
+            top: 30px;
+            background: white;
+            color: black;
+            border-radius: 8px;
+            overflow: hidden;
+            width: 160px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .dropdown a {
+            display: block;
+            padding: 10px;
+            text-decoration: none;
+            color: black;
+        }
+
+        .dropdown a:hover {
+            background: #f1f1f1;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-box {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            width: 320px;
+            text-align: center;
+            animation: pop 0.3s ease;
+        }
+
+        @keyframes pop {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .stars span {
+            font-size: 24px;
+            cursor: pointer;
+            opacity: 0.5;
+        }
+
+        .stars span.active {
+            opacity: 1;
+        }
+
+        .emoji-row {
+            margin: 15px 0;
+        }
+
+        .emoji-row span {
+            font-size: 28px;
+            cursor: pointer;
+            margin: 0 6px;
+            opacity: 0.5;
+            transition: 0.2s;
+        }
+
+        .emoji-row span.active {
+            opacity: 1;
+            transform: scale(1.2);
+        }
+
+        .chips {
+            margin-top: 15px;
+        }
+
+        .chips span {
+            display: inline-block;
+            background: #f1f1f1;
+            padding: 6px 12px;
+            border-radius: 20px;
+            margin: 5px;
+            font-size: 12px;
+            cursor: pointer;
+            color: black;
+        }
+
+        .chips span.selected {
+            background: #4f8dfd;
+            color: white;
+        }
+
+        .modal-actions {
+            margin-top: 20px;
+        }
+
+        .submit {
+            background: #4f8dfd;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+        }
+
+        .skip {
+            background: none;
+            border: none;
+            margin-right: 10px;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="navbar">
+    <h2>Code Genie</h2>
+
+    <div class="user-menu">
+        <span onclick="toggleMenu()" style="cursor:pointer;">
+            👤 {{ current_user.name }} ▼
+        </span>
+        
+        <div id="dropdown" class="dropdown hidden">
+            <a href="/user_dashboard">My Dashboard</a>
+
+            {% if current_user.role == 'admin' %}
+            <a href="/admin">Admin Panel</a>
+            {% endif %}
+
+            <a href="#" onclick="openFeedback()">Logout</a>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <h1>Select a Programming Language</h1>
+    <p id="errorText" style="color:red; display:none; margin-top:10px; text-align:center;">
+      ⚠️ Please select a programming language first!
+    </p>
+
+    <div class="card-container">
+         <div class="card" onclick="selectLang('Python', this)">
+        <img src="https://cdn-icons-png.flaticon.com/512/5968/5968350.png">
+        <p>Python</p>
+    </div>
+
+    <div class="card" onclick="selectLang('JavaScript', this)">
+        <img src="https://cdn-icons-png.flaticon.com/512/5968/5968292.png">
+        <p>JavaScript</p>
+    </div>
+
+    <div class="card" onclick="selectLang('Java', this)">
+        <img src="https://cdn-icons-png.flaticon.com/512/226/226777.png">
+        <p>Java</p>
+    </div>
+
+    <div class="card" onclick="selectLang('C++', this)">
+        <img src="https://cdn-icons-png.flaticon.com/512/6132/6132222.png">
+        <p>C++</p>
+    </div>
+
+    <div class="card" onclick="selectLang('C#', this)">
+        <img src="https://cdn-icons-png.flaticon.com/512/6132/6132221.png">
+        <p>C#</p>
+    </div>
+
+    <div class="card" onclick="selectLang('Ruby', this)">
+        <img src="https://cdn-icons-png.flaticon.com/512/919/919842.png">
+        <p>Ruby</p>
+    </div>
+
+    <div class="card" onclick="selectLang('Go', this)">
+        <img src="https://cdn-icons-png.flaticon.com/512/919/919837.png">
+        <p>Go</p>
+    </div>
+
+    <div class="card" onclick="selectLang('Rust', this)">
+        <img src="https://cdn-icons-png.flaticon.com/512/919/919828.png">
+        <p>Rust</p>
+    </div>
+
+</div>
+    </div>
+
+    <div class="main-grid">
+
+    <!-- LEFT SIDE -->
+    <div class="left-panel">
+
+        <div class="prompt-box">
+        <h3>Enter Your Prompt</h3>
+        <p id="selectedLangText" style="margin-bottom:10px;color:#555;">
+        Selected Language: None
+        </p>
+        <textarea id="prompt" placeholder="Describe what you want to generate..."></textarea>
+
+            <div class="btn-row">
+                <button class="generate-btn" onclick="generateCode()">Generate Code</button>
+                <button class="copy-btn" onclick="copyCode()">Copy Code</button>
+            </div>
+        </div>
+
+        <div class="explanation-box">
+            <h3>Explanation</h3>
+            <div id="explanation">Explanation will appear here...</div>
+        </div>
+
+        <div class="keywords-box">
+            <h3>Keywords</h3>
+            <div id="keywords">Keywords will appear here...</div>
+        </div>
+
+    </div>
+
+    <!-- RIGHT SIDE -->
+    <div class="code-panel">
+
+        <h3 class="code-title">Generated Code</h3>
+
+        <pre class="output-box">
+        <code id="output"></code>
+        </pre>
+    </div>
+
+</div>
+
+</div>
+
+<script>
+let selectedLanguage = "";
+
+function toggleMenu(){
+    document.getElementById("dropdown").classList.toggle("hidden");
+}
+document.addEventListener("click", function(event){
+    const menu = document.querySelector(".user-menu");
+    const dropdown = document.getElementById("dropdown");
+
+    if (!menu.contains(event.target)) {
+        dropdown.classList.add("hidden");
+    }
+});
+
+function selectLang(lang, element){
+
+    selectedLanguage = lang;
+
+    document.querySelectorAll(".card").forEach(card=>{
+        card.classList.remove("selected");
+    });
+
+    element.classList.add("selected");
+
+    document.getElementById("selectedLangText").innerText =
+        "Selected Language: " + lang;
+    document.getElementById("errorText").style.display = "none";
+}
+
+function generateCode() {
+    const prompt = document.getElementById("prompt").value;
+
+    if (!selectedLanguage) {
+        document.getElementById("errorText").style.display = "block";
+        return;
+    }
+    
+    document.getElementById("output").innerText = "⚡ Generating code...";
+    document.getElementById("explanation").innerText = "AI is thinking...";
+    document.getElementById("keywords").innerText = "...";
+
+    fetch("/generate", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            prompt: prompt,
+            language: selectedLanguage
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+
+    const codeBlock = document.getElementById("output");
+
+    // clear previous language classes
+    codeBlock.className = "";
+
+    // detect selected language
+    let lang = selectedLanguage.toLowerCase();
+
+    if(lang === "c++") lang = "cpp";
+    if(lang === "c#") lang = "csharp";
+
+    codeBlock.classList.add("language-" + lang);
+
+    codeBlock.textContent = data.code;
+
+    document.getElementById("explanation").innerText = data.explanation;
+    document.getElementById("keywords").innerText = data.keywords.join(", ");
+
+    hljs.highlightElement(codeBlock);
+
+});
+
+}
+function copyCode(){
+    const code = document.getElementById("output").innerText;
+    navigator.clipboard.writeText(code);
+    const btn = document.querySelector(".copy-btn");
+    btn.innerText = "Copied!";
+    setTimeout(()=>btn.innerText="Copy Code",1500);
+}
+
+
+function openFeedback(){
+    document.getElementById("feedbackModal").style.display = "flex";
+}
+
+function submitFeedbackAndLogout(){
+    const selectedChips = [...document.querySelectorAll(".chips span.selected")]
+        .map(c => c.innerText);
+
+    fetch('/submit_feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            rating: document.getElementById('rating').value,
+            comment: selectedChips.join(", ")
+        })
+    }).then(() => {
+        window.location.href = "/logout";
+    });
+}
+
+function setRating(val){
+    document.getElementById("rating").value = val;
+
+    const emojis = document.querySelectorAll(".emoji-row span");
+
+    emojis.forEach((e, i) => {
+        e.classList.remove("active");
+        if(i < val){
+            e.classList.add("active");
+        }
+    });
+}
+
+function selectChip(el){
+    el.classList.toggle("selected");
+}
+
+function logoutDirect(){
+    window.location.href = "/logout";
+}
+
+</script>
+
+
+<!-- FEEDBACK POPUP -->
+<div id="feedbackModal" class="modal" style="display:none;">
+    <div class="modal-box">
+
+        <h3>✨ How was CodeGenie today?</h3>
+
+        <p style="font-size:13px; color:#777;">
+            5 seconds — your rating helps us improve
+        </p>
+
+        <div class="emoji-row">
+            <span onclick="setRating(1)">😡</span>
+            <span onclick="setRating(2)">😕</span>
+            <span onclick="setRating(3)">😐</span>
+            <span onclick="setRating(4)">😊</span>
+            <span onclick="setRating(5)">😍</span>
+        </div>
+
+        <input type="hidden" id="rating" value="5">
+
+        <div class="chips">
+            <span onclick="selectChip(this)">Great code quality</span>
+            <span onclick="selectChip(this)">Fast generation</span>
+            <span onclick="selectChip(this)">Good explanation</span>
+            <span onclick="selectChip(this)">UI is clean</span>
+            <span onclick="selectChip(this)">Needs improvement</span>
+        </div>
+
+        <div class="modal-actions">
+            <button class="skip" onclick="logoutDirect()">Skip</button>
+            <button class="submit" onclick="submitFeedbackAndLogout()">Submit</button>
+        </div>
+
+    </div>
+</div>
+  
+</body>
+</html>
